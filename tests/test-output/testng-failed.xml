@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite guice-stage="DEVELOPMENT" name="Failed suite [VinylPi]">
+  <parameter name="stat-page-url" value="http://192.168.1.131:8090/stat.html"/>
+  <parameter name="connection-name" value="pi-feed.ffm(input)"/>
+  <parameter name="stream-class-name" value="stream-path"/>
+  <parameter name="stat-page-title" value="ffserver Status"/>
+  <parameter name="connection-class-name" value="connectinon-name"/>
+  <parameter name="stream-name" value="pi-stream.mp3"/>
+  <test name="Regression1">
+    <packages>
+      <package name="org.vinylpi.tests.unittests"/>
+    </packages>
+    <classes>
+      <class name="org.vinylpi.tests.unittests.StatPageTest"/>
+    </classes>
+  </test> <!-- Regression1 -->
+  <test name="Regression1(failed)">
+    <classes>
+      <class name="org.vinylpi.tests.unittests.StatPageTest">
+        <methods>
+          <include name="beforeClass"/>
+          <include name="testStreamAvailable" invocation-numbers="0"/>
+          <include name="testConnectionAvailable" invocation-numbers="0"/>
+          <include name="afterClass"/>
+        </methods>
+      </class> <!-- org.vinylpi.tests.unittests.StatPageTest -->
+    </classes>
+  </test> <!-- Regression1(failed) -->
+</suite> <!-- Failed suite [VinylPi] -->
