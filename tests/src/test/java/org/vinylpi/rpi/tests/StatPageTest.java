@@ -1,7 +1,7 @@
-package org.vinylpi.tests.unittests;
+package org.vinylpi.rpi.tests;
 
 import org.testng.annotations.Test;
-import org.vinylpi.tests.pageobjects.StatPage;
+import org.vinylpi.rpi.pageobjects.StatPage;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 import org.testng.Assert;

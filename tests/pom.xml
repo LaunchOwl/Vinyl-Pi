@@ -24,5 +24,15 @@
 			<version>6.9.10</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.selendroid</groupId>
+			<version>0.17.0</version>
+			<artifactId>selendroid-standalone</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.selendroid</groupId>
+			<version>0.17.0</version>
+			<artifactId>selendroid-client</artifactId>
+		</dependency>
 	</dependencies>
 </project>
