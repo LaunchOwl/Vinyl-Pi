@@ -1,15 +1,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="VinylPi" verbose="1">
+<suite name="Raspberry Pi Suite" verbose="1">
 	<parameter name="stat-page-url" value="http://192.168.1.131:8090/stat.html"></parameter>
 	<parameter name="stat-page-title" value="ffserver Status"></parameter>
 	<parameter name="stream-name" value="pi-stream.mp3"></parameter>
 	<parameter name="stream-class-name" value="stream-name"></parameter>
 	<parameter name="connection-name" value="pi-feed.ffm"></parameter>
 	<parameter name="connection-class-name" value="connection-name"></parameter>
-	<test name="Regression1">
+	<test name="Raspberry Pi Tests">
 		<packages>
-			<!-- <package name="org.vinylpi.rpi.tests" />  -->
-			<package name="org.vinylpi.android.tests" />
+			<package name="io.vinylpi.rpi.tests" />
 		</packages>
 	</test>
 </suite> 
