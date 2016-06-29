@@ -1,4 +1,4 @@
-package org.vinylpi.rpi.pageobjects;
+package io.vinylpi.rpi.pageobjects;
 
 import java.util.List;
 
