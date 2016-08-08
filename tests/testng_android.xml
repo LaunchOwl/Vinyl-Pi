@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Android Suite" verbose="1">
+
+	<test name="Android Tests">
+		<groups>
+			<run>
+				<include name="init" />
+			</run>
+		</groups>
+		<packages>
+			<package name="io.vinylpi.android.tests" />
+		</packages>
+	</test>
+</suite> 
