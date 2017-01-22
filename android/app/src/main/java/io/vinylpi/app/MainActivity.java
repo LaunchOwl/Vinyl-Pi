@@ -19,9 +19,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.net.nsd.NsdServiceInfo;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
@@ -47,7 +50,8 @@ public class MainActivity extends AppCompatActivity
     private android.net.nsd.NsdManager mNsdManager;
     private static final String TAG = "MainActivity";
     private static final String SERVICE_TYPE = "_http._tcp";
-    private static final int PI_DEVICE_PORT = 3001;
+    private static final int PI_DEVICE_HTTP_PORT = 3000;
+    private static final int PI_DEVICE_SOCKET_PORT = 3001;
     private List<PiDevice> piDevices;
 
     @Override
@@ -209,7 +213,7 @@ public class MainActivity extends AppCompatActivity
         for (int i = 0; i < 256; i++) {
             String otherAddress = ipAddress + String.valueOf(i);
             try {
-                if (InetAddress.getByName(otherAddress.toString()).isReachable(50)) {
+                if (InetAddress.getByName(otherAddress.toString()).isReachable(1)) {
                     System.out.println(otherAddress);
                 }
             } catch (UnknownHostException e) {
@@ -281,7 +285,7 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
 
-            try {
+           /* try {
                 try {
                     Socket socket = new Socket(InetAddress.getByName("192.168.1.131"), 3001);
 
@@ -295,25 +299,26 @@ public class MainActivity extends AppCompatActivity
                 }
             }   catch (Exception e) {
                     e.printStackTrace();
-                }
+            }*/
 
             Log.d(TAG, "IP Address: " + ipAddress);
             ipAddress = ipAddress.substring(0, ipAddress.lastIndexOf('.')) + ".";
-            for (int i = 0; i < 256; i++) {
+            for (int i = 130; i < 132; i++) {
                 String otherAddress = ipAddress + String.valueOf(i);
                 //Log.d(TAG, otherAddress);
                 try {
-                    if (InetAddress.getByName(otherAddress.toString()).isReachable(500)) {
-                        InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName(otherAddress.toString()), PI_DEVICE_PORT);
-                        ServerSocket serverSocket = new ServerSocket();
-                        try {
-                            serverSocket.bind(socketAddress);
+                    if (InetAddress.getByName(otherAddress.toString()).isReachable(2000)) {
+                        Log.d(TAG, otherAddress + " is up");
+
+                        if (piDeviceAvailable(otherAddress)) {
                             PiDevice newDevice = getDevice(otherAddress.toString());
-                            piDevices.add(newDevice);
-                            Log.d(TAG, otherAddress);
-                        } catch (IOException e) {
-                            Log.d(TAG, "Port not available on " + otherAddress);
+
+                            if (newDevice != null)
+                                piDevices.add(newDevice);
                         }
+
+                    } else {
+                        Log.d(TAG, otherAddress + " is down");
                     }
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
@@ -331,34 +336,81 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(Void v) {
            // showDialog("Downloaded " + result + " bytes");
             Log.d(TAG, "Finished scanning");
+
+            TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
+            scanMessageTextView.setVisibility(View.VISIBLE);
+
+            LinearLayout scanStatusLayout = (LinearLayout) findViewById(io.vinylpi.app.R.id.ll_scan_status);
+            scanStatusLayout.setVisibility(View.GONE);
+
+            final FloatingActionButton fab = (FloatingActionButton) findViewById(io.vinylpi.app.R.id.fab_scan);
+            fab.show();
+        }
+
+        private boolean piDeviceAvailable(String address) {
+            Socket socket = null;
+            try {
+                socket = new Socket(InetAddress.getByName(address), PI_DEVICE_SOCKET_PORT);
+                Log.d(TAG, "Can connect to pi device");
+                return true;
+            } catch (java.net.UnknownHostException e) {
+
+            } catch (java.io.IOException e) {
+
+            } finally {
+                /*if (socket != null) {
+                    try {
+                        socket.close();
+                    } catch (java.io.IOException e) {
+
+                    }
+                }*/
+            }
+            Log.d(TAG, "Cannot connect to pi device");
+            return false;
         }
 
         private PiDevice getDevice(String ipAddress) throws IOException {
             InputStream inputStream = null;
+            HttpURLConnection conn = null;
             // Only display the first 500 characters of the retrieved
             // web page content.
-            int len = 500;
+            //int len = 500;
 
             try {
-                String deviceUrl = "http://" + ipAddress + ":3000/device";
+                String deviceUrl = "http://" + ipAddress + ":" + PI_DEVICE_HTTP_PORT + "/device";
                 URL url = new URL(deviceUrl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
                 conn.setRequestMethod("GET");
                 conn.setDoInput(true);
+                conn.setRequestProperty("Accept", "text/json");
+                //conn.setRequestProperty("Accept", "text/plain");
 
                 conn.connect();
                 int response = conn.getResponseCode();
                 Log.d(TAG, "The response is: " + response);
                 inputStream = conn.getInputStream();
 
+
                 // Convert the InputStream into a string
-                String contentAsString = readIt(inputStream, len);
+                String contentAsString = readIt(inputStream, inputStream.available());
                 Log.d(TAG, contentAsString);
+
+            } catch (java.net.ConnectException e) {
+                //e.printStackTrace();
+                Log.d(TAG, "Connection refused to PI device");
+            } catch (java.net.ProtocolException e) {
+                e.printStackTrace();
             } finally {
                 if (inputStream != null) {
                     inputStream.close();
+                }
+
+                if (conn != null) {
+                    conn.disconnect();
+                    conn = null;
                 }
             }
             return null;
@@ -366,11 +418,9 @@ public class MainActivity extends AppCompatActivity
 
         // Reads an InputStream and converts it to a String.
         private String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-            Reader reader = null;
-            reader = new InputStreamReader(stream, "UTF-8");
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
+           StringWriter writer = new StringWriter();
+            IOUtils.copy(stream, writer, "UTF08");
+            return writer.toString();
         }
     }
 
