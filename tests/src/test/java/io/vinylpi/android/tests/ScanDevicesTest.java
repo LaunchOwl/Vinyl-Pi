@@ -26,7 +26,12 @@ public class ScanDevicesTest {
 	
 	@Test (groups = {"scanDevices"}, dependsOnMethods = {"testUIElements"})
 	public void testScanning() {
-		verifyScanStarted();
+		verifyScanCompleted();
+	}
+	
+	@Test (groups = {"scanDevices"}, dependsOnMethods = {"verifyScanCompleted"})
+	public void testResultSet() {
+		verifyScanCompleted();
 	}
 	
 	@BeforeClass (alwaysRun=true)
@@ -38,8 +43,8 @@ public class ScanDevicesTest {
 		selendroidServer.launchSelendroid();
 		
 		SelendroidCapabilities capabilities = new SelendroidCapabilities("io.vinylpi.app:0.1.0");
-		capabilities.setEmulator(true);;
-		capabilities.setModel("Nexus 5");
+		capabilities.setEmulator(false);
+		//capabilities.setModel("Nexus 5");
 		
 		try {
 			driver = new SelendroidDriver(capabilities);
@@ -57,7 +62,7 @@ public class ScanDevicesTest {
 		Assert.assertTrue(scanMessage.isDisplayed());
 	}
 	
-	private void verifyScanStarted() {
+	private void verifyScanCompleted() {
 		final WebElement scanButton = driver.findElement(By.id("fab_scan"));
 		final WebElement scanAnimation = driver.findElement(By.id("ll_scan_status"));
 		

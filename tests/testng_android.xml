@@ -5,6 +5,7 @@
 		<groups>
 			<run>
 				<include name="init" />
+				<include name="scanDevices" />
 			</run>
 		</groups>
 		<packages>
