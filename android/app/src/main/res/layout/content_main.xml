@@ -10,7 +10,8 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    tools:showIn="@layout/app_bar_main">
+    tools:showIn="@layout/app_bar_main"
+    android:id="@+id/rl_content_main">
 
 
     <LinearLayout android:id="@+id/ll_scan_status"
@@ -48,4 +49,5 @@
         android:layout_marginTop="8dp"
         android:text="@string/scan_message"
         android:textSize="18sp" />
+
 </RelativeLayout>

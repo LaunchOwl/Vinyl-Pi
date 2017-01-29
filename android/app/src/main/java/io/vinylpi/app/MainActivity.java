@@ -1,10 +1,18 @@
 package io.vinylpi.app;
 
+
 import android.content.Context;
+import android.database.Cursor;
 import android.net.nsd.NsdManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v7.widget.RecyclerView;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -18,33 +26,30 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.net.nsd.NsdServiceInfo;
+import android.widget.Toast;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
-import io.vinylpi.app.PiDevice;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        LoaderManager.LoaderCallbacks<Cursor>,
+        DeviceListFragment.OnListFragmentInteractionListener {
 
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private android.net.nsd.NsdManager mNsdManager;
@@ -52,7 +57,8 @@ public class MainActivity extends AppCompatActivity
     private static final String SERVICE_TYPE = "_http._tcp";
     private static final int PI_DEVICE_HTTP_PORT = 3000;
     private static final int PI_DEVICE_SOCKET_PORT = 3001;
-    private List<PiDevice> piDevices;
+    private ArrayList<PiDevice> piDevices;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,7 +257,13 @@ public class MainActivity extends AppCompatActivity
     // NsdHelper's tearDown method
     public void tearDown() {
         //mNsdManager.unregisterService(mRegistrationListener);
-        mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+        if (mNsdManager != null)
+            mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+    }
+
+    @Override
+    public void onListFragmentInteraction(PiDevice item) {
+        Toast.makeText(this, item.getDeviceName(), Toast.LENGTH_SHORT).show();
     }
 
     private class ScanNetworkTask extends AsyncTask<Void, Void, Void> {
@@ -334,11 +346,19 @@ public class MainActivity extends AppCompatActivity
         }
 
         protected void onPostExecute(Void v) {
-           // showDialog("Downloaded " + result + " bytes");
             Log.d(TAG, "Finished scanning");
 
-            TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
-            scanMessageTextView.setVisibility(View.VISIBLE);
+            // If no devices found display the default scan message, otherwise display device list.
+            if (piDevices.isEmpty()) {
+                TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
+                scanMessageTextView.setVisibility(View.VISIBLE);
+            } else {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                DeviceListFragment itemFragment = DeviceListFragment.newInstance(piDevices);
+                fragmentTransaction.add(R.id.rl_content_main, itemFragment);
+                fragmentTransaction.commit();
+            }
 
             LinearLayout scanStatusLayout = (LinearLayout) findViewById(io.vinylpi.app.R.id.ll_scan_status);
             scanStatusLayout.setVisibility(View.GONE);
@@ -373,6 +393,9 @@ public class MainActivity extends AppCompatActivity
         private PiDevice getDevice(String ipAddress) throws IOException {
             InputStream inputStream = null;
             HttpURLConnection conn = null;
+            PiDevice piDevice = null;
+            int connections = -1;
+            String deviceName = null;
             // Only display the first 500 characters of the retrieved
             // web page content.
             //int len = 500;
@@ -393,10 +416,28 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "The response is: " + response);
                 inputStream = conn.getInputStream();
 
-
                 // Convert the InputStream into a string
-                String contentAsString = readIt(inputStream, inputStream.available());
-                Log.d(TAG, contentAsString);
+                //String contentAsString = readIt(inputStream, inputStream.available());
+                //Log.d(TAG, contentAsString);
+
+                JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String name = reader.nextName();
+                    if (name.equals("device")) {
+                        deviceName = reader.nextString();
+                    } else if (name.equals("connections")) {
+                        connections = reader.nextInt();
+                    }
+                }
+                reader.endObject();
+
+                //Parcel parcel = Parcel.obtain();
+                //parcel.writeString(deviceName);
+                //parcel.writeInt(connections);
+                piDevice = new PiDevice();
+                piDevice.setDeviceName(deviceName);
+                piDevice.setConnections(connections);
 
             } catch (java.net.ConnectException e) {
                 //e.printStackTrace();
@@ -413,7 +454,7 @@ public class MainActivity extends AppCompatActivity
                     conn = null;
                 }
             }
-            return null;
+            return piDevice;
         }
 
         // Reads an InputStream and converts it to a String.
@@ -424,5 +465,27 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // Called when a new Loader needs to be created
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        //return new CursorLoader(this, ContactsContract.Data.CONTENT_URI,
+        //        PROJECTION, SELECTION, null, null);
+        return null;
+    }
 
+    // Called when a previously created loader has finished loading
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        //mAdapter.swapCursor(data);
+    }
+
+    // Called when a previously created loader is reset, making the data unavailable
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        //mAdapter.swapCursor(null);
+    }
 }

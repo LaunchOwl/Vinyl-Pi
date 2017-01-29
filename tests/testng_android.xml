@@ -2,6 +2,7 @@
 <suite name="Android Suite" verbose="1">
 
 	<test name="Android Tests">
+	    <parameter name="deviceName" value="Whippy Dip"/> 
 		<groups>
 			<run>
 				<include name="init" />
