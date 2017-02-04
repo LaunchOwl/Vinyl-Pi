@@ -3,6 +3,8 @@
 
 	<test name="Android Tests">
 	    <parameter name="deviceName" value="Whippy Dip"/> 
+	    <parameter name="connectionCount" value="0"/> 
+	    <parameter name="maxConnectionCount" value="10"/> 
 		<groups>
 			<run>
 				<include name="init" />

@@ -2,6 +2,7 @@ package io.vinylpi.app;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.nsd.NsdManager;
 import android.os.AsyncTask;
@@ -23,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.net.nsd.NsdServiceInfo;
@@ -50,6 +52,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor>,
         DeviceListFragment.OnListFragmentInteractionListener {
+
+    public final static String EXTRA_PI_DEVICE = "io.vinylpi.app.PI_DEVICE";
 
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private android.net.nsd.NsdManager mNsdManager;
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(io.vinylpi.app.R.id.drawer_layout);
+        /*DrawerLayout drawer = (DrawerLayout) findViewById(io.vinylpi.app.R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, io.vinylpi.app.R.string.navigation_drawer_open, io.vinylpi.app.R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -96,17 +100,19 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(io.vinylpi.app.R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);*/
+
         piDevices = new ArrayList<PiDevice>();
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(io.vinylpi.app.R.id.drawer_layout);
+        /*DrawerLayout drawer = (DrawerLayout) findViewById(io.vinylpi.app.R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
-        }
+        }*/
     }
 
     @Override
@@ -135,7 +141,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        /*int id = item.getItemId();
 
         if (id == io.vinylpi.app.R.id.nav_camera) {
             // Handle the camera action
@@ -152,8 +158,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(io.vinylpi.app.R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        drawer.closeDrawer(GravityCompat.START);*/
         return true;
+
     }
 
     public void initializeDiscoveryListener() {
@@ -264,6 +271,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onListFragmentInteraction(PiDevice item) {
         Toast.makeText(this, item.getDeviceName(), Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, DeviceActivity.class);
+        intent.putExtra(EXTRA_PI_DEVICE, item);
+        startActivity(intent);
     }
 
     private class ScanNetworkTask extends AsyncTask<Void, Void, Void> {
@@ -378,13 +389,13 @@ public class MainActivity extends AppCompatActivity
             } catch (java.io.IOException e) {
 
             } finally {
-                /*if (socket != null) {
+                if (socket != null) {
                     try {
                         socket.close();
                     } catch (java.io.IOException e) {
 
                     }
-                }*/
+                }
             }
             Log.d(TAG, "Cannot connect to pi device");
             return false;

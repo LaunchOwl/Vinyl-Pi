@@ -34,11 +34,21 @@ public class ScanDevicesTest {
 	}
 	
 	@Test (groups = {"scanDevices"}, dependsOnMethods = {"testScanning"})
-	@Parameters("deviceName")
-	public void testResultSet(String deviceName) {
-		verifyScanResultSet(deviceName);
+	public void testResultSet() {
+		verifyScanResultSet();
 	}
 	
+	@Test (groups = {"scanDevices"}, dependsOnMethods = {"testResultSet"})
+	@Parameters({"deviceName","connectionCount","maxConnectionCount"})
+	public void testResultSetUIElements(String deviceName, String connectionCount, String maxConnectionCount) {
+		verifyScanResultSetUIElements(deviceName, connectionCount, maxConnectionCount);
+	}
+	
+	@Test (groups = {"scanDevices"}, dependsOnMethods = {"testResultSetUIElements"})
+	public void testOpenDeviceActivity() {
+		verifyDeviceActivityOpened();
+	}
+
 	@BeforeClass (alwaysRun=true)
 	public void beforeClass() {
 		SelendroidConfiguration config = new SelendroidConfiguration();
@@ -101,7 +111,19 @@ public class ScanDevicesTest {
 	 * Test to ensure the result list has devices returned from the scan. If no devices were found, the
 	 * result list shouldn't be visible or be empty.
 	 */
-	private void verifyScanResultSet(String deviceName) {
+	private void verifyScanResultSet() {
+		final WebElement resultList = driver.findElement(By.id("rv_rpi_devices"));
+		if (resultList.isDisplayed()) {
+			//WebElement list = driver.findElement(By.xpath("//android.support.v7.widget.RecyclerView[@id='rv_rpi_devices']"));
+			//List<WebElement> webElements = driver.findElements(By.xpath("//android.support.v7.widget.RecyclerView[@id='rv_rpi_devices'//android.widget.LinearLayout"));
+			
+			List<WebElement> webElements = resultList.findElements(By.className("android.widget.LinearLayout"));
+			System.out.println("Count: " + webElements.size());
+			Assert.assertTrue(webElements.size() > 0, "");
+		}
+	}
+	
+	private void verifyScanResultSetUIElements(String deviceName, String connectionCount, String maxConnectionCount) {
 		final WebElement resultList = driver.findElement(By.id("rv_rpi_devices"));
 		if (resultList.isDisplayed()) {
 			//WebElement list = driver.findElement(By.xpath("//android.support.v7.widget.RecyclerView[@id='rv_rpi_devices']"));
@@ -114,6 +136,37 @@ public class ScanDevicesTest {
 			WebElement listItem = webElements.get(0);
 			WebElement deviceNameTextView = listItem.findElement(By.id("tv_device_name"));
 			Assert.assertEquals(deviceNameTextView.getText(), deviceName);
+			
+			WebElement connectionsCountTextView = listItem.findElement(By.id("tv_device_count"));
+			Assert.assertEquals(connectionsCountTextView.getText(), connectionCount);
+			
+			WebElement connectionsMaxTextView = listItem.findElement(By.id("tv_device_max"));
+			Assert.assertEquals(connectionsMaxTextView.getText(), maxConnectionCount);
+			
+			WebElement vinylIconImageView = listItem.findElement(By.id("iv_vinyl_icon"));
+			WebElement groupIconImageView = listItem.findElement(By.id("iv_group_icon"));
+		}
+	}
+	
+	private void verifyDeviceActivityOpened() {
+		final WebElement resultList = driver.findElement(By.id("rv_rpi_devices"));
+		if (resultList.isDisplayed()) {
+			//WebElement list = driver.findElement(By.xpath("//android.support.v7.widget.RecyclerView[@id='rv_rpi_devices']"));
+			//List<WebElement> webElements = driver.findElements(By.xpath("//android.support.v7.widget.RecyclerView[@id='rv_rpi_devices'//android.widget.LinearLayout"));
+			
+			List<WebElement> webElements = resultList.findElements(By.className("android.widget.LinearLayout"));
+			System.out.println("Count: " + webElements.size());
+			Assert.assertTrue(webElements.size() > 0, "");
+			
+			WebElement listItem = webElements.get(0);
+			listItem.click();
+			
+			(new WebDriverWait(driver, 2)).until(new ExpectedCondition<Boolean>() {
+		          public Boolean apply(WebDriver d) {
+		        	  WebElement deviceActivityLayout = driver.findElement(By.id("rv_device"));
+		              return (deviceActivityLayout.isDisplayed());
+		          }
+		      });
 		}
 	}
 

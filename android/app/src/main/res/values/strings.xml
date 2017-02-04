@@ -8,4 +8,5 @@
 
     <string name="scan_status">Scanning for devices</string>
     <string name="scan_message">Press the search button to scan for devices</string>
+    <string name="title_activity_device">DeviceActivity</string>
 </resources>
