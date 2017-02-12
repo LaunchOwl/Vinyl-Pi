@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.net.nsd.NsdServiceInfo;
@@ -79,8 +80,9 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();*/
                 fab.hide();
 
-                TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
-                scanMessageTextView.setVisibility(View.GONE);
+                //TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
+                ImageView vinylBackground = (ImageView) findViewById(R.id.iv_vinyl_background);
+                vinylBackground.setVisibility(View.GONE);
 
                 LinearLayout scanStatusLayout = (LinearLayout) findViewById(io.vinylpi.app.R.id.ll_scan_status);
                 scanStatusLayout.setVisibility(View.VISIBLE);
@@ -112,7 +114,7 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
-        }*/
+        }*/super.onBackPressed();
     }
 
     @Override
@@ -358,12 +360,15 @@ public class MainActivity extends AppCompatActivity
 
         protected void onPostExecute(Void v) {
             Log.d(TAG, "Finished scanning");
+            ImageView vinylBackground = (ImageView) findViewById(R.id.iv_vinyl_background);
 
             // If no devices found display the default scan message, otherwise display device list.
             if (piDevices.isEmpty()) {
-                TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
-                scanMessageTextView.setVisibility(View.VISIBLE);
+                //TextView scanMessageTextView = (TextView) findViewById(io.vinylpi.app.R.id.txt_scan_message);
+
+                vinylBackground.setVisibility(View.VISIBLE);
             } else {
+                vinylBackground.setVisibility(View.GONE);
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 DeviceListFragment itemFragment = DeviceListFragment.newInstance(piDevices);
@@ -447,6 +452,7 @@ public class MainActivity extends AppCompatActivity
                 //parcel.writeString(deviceName);
                 //parcel.writeInt(connections);
                 piDevice = new PiDevice();
+                piDevice.setIpAddress(ipAddress);
                 piDevice.setDeviceName(deviceName);
                 piDevice.setConnections(connections);
 

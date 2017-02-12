@@ -4,14 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class PiDevice implements Parcelable {
+    private String mIpAddress;
     private String mDeviceName;
     private int mConnections;
 
     public PiDevice() {}
-
-    public void setDeviceName(String deviceName) {
-        this.mDeviceName = deviceName;
-    }
 
     public PiDevice(Parcel in) {
         super();
@@ -31,6 +28,7 @@ public class PiDevice implements Parcelable {
     };
 
     public void readFromParcel(Parcel in) {
+        mIpAddress = in.readString();
         mDeviceName = in.readString();
         mConnections = in.readInt();
     }
@@ -39,8 +37,17 @@ public class PiDevice implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mIpAddress);
         dest.writeString(mDeviceName);
         dest.writeInt(mConnections);
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.mIpAddress = ipAddress;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.mDeviceName = deviceName;
     }
 
     public void setConnections(int connections) {
@@ -51,9 +58,11 @@ public class PiDevice implements Parcelable {
         return this.mDeviceName;
     }
 
+    public String getIpAddress() {
+        return this.mIpAddress;
+    }
+
     public int getConnections() {
         return this.mConnections;
     }
-
-
 }

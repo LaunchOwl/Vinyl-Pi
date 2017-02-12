@@ -4,7 +4,10 @@
 	<test name="Android Tests">
 	    <parameter name="deviceName" value="Whippy Dip"/> 
 	    <parameter name="connectionCount" value="0"/> 
+	    <parameter name="postConnectionCount" value="1"/> 
 	    <parameter name="maxConnectionCount" value="10"/> 
+	    <parameter name="playButtonSrc" value="@drawable/ic_play_arrow_black_24dp"/> 
+	    <parameter name="pauseButtonSrc" value="@drawable/ic_pause_black_24dp"/> 
 		<groups>
 			<run>
 				<include name="init" />
