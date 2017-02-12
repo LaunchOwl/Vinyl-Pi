@@ -8,6 +8,7 @@ import android.net.nsd.NsdManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private android.net.nsd.NsdManager mNsdManager;
     private static final String TAG = "MainActivity";
+    private static final String DEVICE_FRAGMENT_TAG = "io.vinylpi.app.DeviceListFragment";
     private static final String SERVICE_TYPE = "_http._tcp";
     private static final int PI_DEVICE_HTTP_PORT = 3000;
     private static final int PI_DEVICE_SOCKET_PORT = 3001;
@@ -88,6 +90,16 @@ public class MainActivity extends AppCompatActivity
                 scanStatusLayout.setVisibility(View.VISIBLE);
 
                 //initializeDiscoveryListener();
+                piDevices.clear();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                Fragment itemFragment = fragmentManager.findFragmentByTag(DEVICE_FRAGMENT_TAG);
+                if (itemFragment != null) {
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.remove(itemFragment);
+                    fragmentTransaction.commit();
+                }
+
+
                 new ScanNetworkTask().execute();
 
             }
@@ -272,8 +284,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(PiDevice item) {
-        Toast.makeText(this, item.getDeviceName(), Toast.LENGTH_SHORT).show();
-
         Intent intent = new Intent(this, DeviceActivity.class);
         intent.putExtra(EXTRA_PI_DEVICE, item);
         startActivity(intent);
@@ -372,7 +382,7 @@ public class MainActivity extends AppCompatActivity
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 DeviceListFragment itemFragment = DeviceListFragment.newInstance(piDevices);
-                fragmentTransaction.add(R.id.rl_content_main, itemFragment);
+                fragmentTransaction.add(R.id.rl_content_main, itemFragment, DEVICE_FRAGMENT_TAG);
                 fragmentTransaction.commit();
             }
 

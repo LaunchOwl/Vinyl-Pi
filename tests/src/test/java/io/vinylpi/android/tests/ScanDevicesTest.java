@@ -61,6 +61,12 @@ public class ScanDevicesTest {
 	public void testPlayback(String connectionCount) {
 		verifyPlayback(connectionCount);
 	}
+	
+	@Test(groups = { "scanDevices", "playback" }, dependsOnMethods = { "testPlayback" })
+	@Parameters({ "connectionCount" })
+	public void testPause(String connectionCount) {
+		verifyPause(connectionCount);
+	}
 
 	@BeforeClass(alwaysRun = true)
 	public void beforeClass() {
@@ -237,6 +243,23 @@ public class ScanDevicesTest {
 		new WebDriverWait(driver, 30)
 				.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("iv_pause"))));
 		
+		
+		(new WebDriverWait(driver, 5)).until(new ExpectedCondition<Boolean>() {
+			public Boolean apply(WebDriver d) {
+				WebElement connectionsCountTextView = driver.findElement(By.id("tv_device_count"));
+				return (connectionsCountTextView.getText().equals(connectionCount));		
+			}
+		});
+		;
+	}
+	
+	private void verifyPause(final String connectionCount) {
+		WebElement pauseButton = driver.findElement(By.id("iv_pause"));
+		pauseButton.click();
+		Assert.assertTrue(!pauseButton.isDisplayed());
+		
+		WebElement playButton = driver.findElement(By.id("iv_play"));
+		Assert.assertTrue(playButton.isDisplayed());
 		
 		(new WebDriverWait(driver, 5)).until(new ExpectedCondition<Boolean>() {
 			public Boolean apply(WebDriver d) {

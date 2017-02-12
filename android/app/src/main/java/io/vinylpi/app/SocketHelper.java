@@ -7,10 +7,13 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class SocketHelper {
     private static final String TAG = "SocketHelper";
@@ -30,7 +33,7 @@ public class SocketHelper {
         new SocketConnectionTask().execute(mAddress);
     }
 
-    public void Disconnect() {
+    public void disconnect() {
         try {
             if (socket != null) {
                 socket.close();
@@ -38,6 +41,17 @@ public class SocketHelper {
             }
         } catch (java.io.IOException e) {
             Log.d(TAG, "IO exception disconnecting from " + mAddress);
+        }
+    }
+
+    public void sendData(String message) {
+        try {
+            PrintWriter out =
+                    new PrintWriter(socket.getOutputStream(), true);
+            out.println(message);
+        } catch (IOException e) {
+            Log.d(TAG, "Problem writing to socket");
+            e.printStackTrace();
         }
     }
 
@@ -58,10 +72,11 @@ public class SocketHelper {
 
                 //DataInputStream input = new DataInputStream(socket.getInputStream());
                 String line = "";
-                while ((line = in.readLine()) != null) {
+                while ((line = in.readLine()) != null && !socket.isClosed()) {
                     line.toString();
                     onDataReceivedListener.onDataReceived(line);
                 }
+            } catch (SocketException e) {
             } catch (java.net.UnknownHostException e) {
                 Log.d(TAG, "Unknown host " + mAddress);
             } catch (java.io.IOException e) {
