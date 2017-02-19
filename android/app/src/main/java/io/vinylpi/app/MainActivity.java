@@ -400,15 +400,15 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "Can connect to pi device");
                 return true;
             } catch (java.net.UnknownHostException e) {
-
+                e.printStackTrace();
             } catch (java.io.IOException e) {
-
+                e.printStackTrace();
             } finally {
                 if (socket != null) {
                     try {
                         socket.close();
                     } catch (java.io.IOException e) {
-
+                        e.printStackTrace();
                     }
                 }
             }

@@ -1,16 +1,20 @@
 package io.vinylpi.app;
 
 import android.os.AsyncTask;
+import android.util.JsonWriter;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -71,6 +75,23 @@ public class SocketHelper {
                                 new InputStreamReader(socket.getInputStream()));
 
                 //DataInputStream input = new DataInputStream(socket.getInputStream());
+                try {
+                    StringWriter stringWriter = new StringWriter();
+                    Writer out
+                            = new BufferedWriter(new OutputStreamWriter(System.out));
+                    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+                    jsonWriter.setIndent("  ");
+                    //jsonWriter.beginArray();
+                    jsonWriter.beginObject();
+                    jsonWriter.name("eventId").value("0");
+                    jsonWriter.endObject();
+                    //jsonWriter.endArray();
+                    jsonWriter.close();
+                    sendData(stringWriter.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 String line = "";
                 while ((line = in.readLine()) != null && !socket.isClosed()) {
                     line.toString();

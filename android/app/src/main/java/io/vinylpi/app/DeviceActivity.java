@@ -155,7 +155,7 @@ public class DeviceActivity extends AppCompatActivity {
                                         jsonWriter.setIndent("  ");
                                         //jsonWriter.beginArray();
                                         jsonWriter.beginObject();
-                                        jsonWriter.name("eventId").value("0");
+                                        jsonWriter.name("eventId").value("1");
                                         jsonWriter.endObject();
                                         //jsonWriter.endArray();
                                         jsonWriter.close();
@@ -259,31 +259,32 @@ public class DeviceActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mediaPlayer != null) {
-            try {
-                StringWriter stringWriter = new StringWriter();
-                Writer out
-                        = new BufferedWriter(new OutputStreamWriter(System.out));
-                JsonWriter jsonWriter = new JsonWriter(stringWriter);
-                jsonWriter.setIndent("  ");
-                //jsonWriter.beginArray();
-                jsonWriter.beginObject();
-                jsonWriter.name("eventId").value("1");
-                jsonWriter.endObject();
-                //jsonWriter.endArray();
-                jsonWriter.close();
-                socketHelper.sendData(stringWriter.toString());
+        int closeType = 2;
+        if (mediaPlayer != null)
+            closeType = 3;
+
+        destroyMediaPlayer();
+        try {
+            StringWriter stringWriter = new StringWriter();
+            Writer out
+                    = new BufferedWriter(new OutputStreamWriter(System.out));
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.setIndent("  ");
+            //jsonWriter.beginArray();
+            jsonWriter.beginObject();
+            jsonWriter.name("eventId").value(String.valueOf(closeType));
+            jsonWriter.endObject();
+            //jsonWriter.endArray();
+            jsonWriter.close();
+            socketHelper.sendData(stringWriter.toString());
 
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                destroyMediaPlayer();
-
-                if (socketHelper != null)
-                   socketHelper.disconnect();
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        if (socketHelper != null)
+            socketHelper.disconnect();
 
         //if (socketHelper != null)
          //   socketHelper.disconnect();
