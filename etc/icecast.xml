@@ -1,0 +1,55 @@
+<!-- This config file contains a minimal set of configurable parameters,
+     and mostly just contains the things you need to change or are
+     necessary to get Icecast working for most use cases.  We created
+     this for those who got scared away from the rather large and heavily
+     commented icecast.xml.dist file. -->
+<icecast>
+    <limits>
+        <sources>2</sources>
+    </limits>
+    <authentication>
+        <source-password>hackme</source-password>
+        <relay-password>hackme</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>hackme</admin-password>
+    </authentication>
+    <hostname>192.168.1.131</hostname>
+    <listen-socket>
+        <port>8000</port>
+    </listen-socket>
+    <fileserve>1</fileserve>
+    <paths>
+        <logdir>/usr/local/var/log/icecast</logdir>
+        <webroot>/usr/local/share/icecast/web</webroot>
+        <adminroot>/usr/local/share/icecast/admin</adminroot>
+        <alias source="/" destination="/status.xsl"/>
+    </paths>
+    <logging>
+        <accesslog>access.log</accesslog>
+        <errorlog>error.log</errorlog>
+        <loglevel>3</loglevel> <!-- 4 Debug, 3 Info, 2 Warn, 1 Error -->
+    </logging>
+    <http-headers>
+        <header name="Access-Control-Allow-Origin" value="*" />
+    </http-headers>
+
+<mount type="normal">                                                                                                      
+        <mount-name>/example.ogg</mount-name>                                                                          
+                                                                                                                               
+        <max-listeners>1</max-listeners>                                                                                       
+        <dump-file>/tmp/dump-example1.ogg</dump-file>                                                                          
+       <burst-size>65536</burst-size>                                                                                         
+        <fallback-mount>/example2.ogg</fallback-mount>                                                                         
+        <fallback-override>1</fallback-override>                                                                               
+        <fallback-when-full>1</fallback-when-full>                                                                             
+        <intro>/example_intro.ogg</intro>                                                                                      
+        <hidden>1</hidden>                                                                                                     
+        <public>1</public>                                                                                                     
+        <http-headers>                                                                                                         
+                <header name="Access-Control-Allow-Origin" value="http://webplayer.example.org" />                             
+                <header name="baz" value="quux" />                                                                             
+        </http-headers>                                                                                                        
+        <on-connect>/home/icecast/bin/stream-start</on-connect>                                                                
+       <on-disconnect>/home/icecast/bin/stream-stop</on-disconnect>                                                           
+    </mount>   
+</icecast>

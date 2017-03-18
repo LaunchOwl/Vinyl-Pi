@@ -24,7 +24,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 	storage.setItem('device','Whippy Dip');
 	device = storage.getItem('device');
 //}
-console.log(device);
 
 app.get('/', function (req, res) {
 	res.sendFile(__dirname + '/index.html');
@@ -43,7 +42,6 @@ app.route('/device')
 // track number of connections
 io.on('connection', function(socket) {
 	connections++;
-	console.log(connections);
 	socket.on('disconnect', function() {
 		connections--;
 	});
@@ -68,8 +66,6 @@ net.createServer(function(sock) {
         // Write the data back to the socket, the client will receive it as data from the server
 	console.log(data);
 	var json = JSON.parse(data);
-	console.log('eventId: ' + json.eventId);
-	console.log('Length: ' + sockets.length);
         
 	if (json.eventId === '0') {
 		sockets.push(sock);                                                                                                        
@@ -83,27 +79,21 @@ net.createServer(function(sock) {
 		if (sockets.length === 0) {
  	               return;
 		}
-		console.log('Here we go up');
   
 		var eventObj = {eventId: 1, connections: connections};
 		var json = JSON.stringify(eventObj);                                                                                                                    
-		console.log('Broadcast length: ' + sockets.length);
 		sockets.forEach(function(socket, index, array) {
-			console.log(json + '\n');
                 	socket.write(json + '\n');
 		}); 
 	} else if (json.eventId === '2' || json.eventId === '3') {
 		if (json.eventId === '3')
 			connections--;
 	
-		console.log('Index of removed: ' + sockets.indexOf(sock));                                                             
         	sockets.splice(sockets.indexOf(sock), 1);                                                                              
-        	console.log('Sockets left: ' + sockets.length);  	
 	
 		if (sockets.length === 0) {
  	               return;
 		}
-		console.log('Here we go down');
   
 		var eventObj = {eventId: 1, connections: connections};
 		var json = JSON.stringify(eventObj);                                                                                                                    
