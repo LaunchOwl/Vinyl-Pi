@@ -1,0 +1,17 @@
+{
+  "name": "node-app",
+  "version": "0.1.0",
+  "description": "Node.js server for handling device status and information",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "socket.io": "^1.4.8",
+    "node-persist": "0.0.11",
+    "body-parser": "^1.15.2"
+  }
+}
